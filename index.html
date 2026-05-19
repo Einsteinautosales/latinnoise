@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Latin Noise LLC</title>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #050505;
+      color: white;
+      overflow-x: hidden;
+    }
+
+    .bg-glow {
+      position: fixed;
+      width: 700px;
+      height: 700px;
+      background: lime;
+      filter: blur(180px);
+      opacity: 0.06;
+      top: -200px;
+      right: -200px;
+      z-index: -1;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 30px 7%;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      position: sticky;
+      top: 0;
+      backdrop-filter: blur(15px);
+      background: rgba(5,5,5,0.8);
+      z-index: 999;
+    }
+
+    .logo {
+      font-size: 42px;
+      font-weight: 900;
+      color: #d9ff00;
+    }
+
+    nav {
+      display: flex;
+      gap: 35px;
+      align-items: center;
+    }
+
+    nav a {
+      color: #aaa;
+      text-decoration: none;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+
+    nav a:hover {
+      color: white;
+    }
+
+    .sell-btn {
+      background: #d9ff00;
+      color: black;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 16px;
+      font-weight: 900;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .sell-btn:hover {
+      transform: scale(1.05);
+    }
+
+    .hero {
+      min-height: 90vh;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 7%;
+      gap: 80px;
+    }
+
+    .hero-text h1 {
+      font-size: 110px;
+      line-height: 0.92;
+      margin-bottom: 30px;
+      font-weight: 900;
+    }
+
+    .hero-text p {
+      color: #888;
+      max-width: 650px;
+      line-height: 1.7;
+      font-size: 20px;
+      margin-bottom: 40px;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 20px;
+    }
+
+    .primary {
+      background: #d9ff00;
+      color: black;
+      border: none;
+      padding: 18px 35px;
+      border-radius: 18px;
+      font-weight: 900;
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    .secondary {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.1);
+      color: white;
+      padding: 18px 35px;
+      border-radius: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    .beats-section {
+      padding: 80px 7%;
+    }
+
+    .section-title {
+      font-size: 60px;
+      font-weight: 900;
+      margin-bottom: 15px;
+    }
+
+    .section-sub {
+      color: #777;
+      margin-bottom: 50px;
+    }
+
+    .beats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit,minmax(320px,1fr));
+      gap: 35px;
+    }
+
+    .beat-card {
+      background: #0d0d0d;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 28px;
+      overflow: hidden;
+      transition: 0.3s;
+    }
+
+    .beat-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(217,255,0,0.4);
+    }
+
+    .beat-card img {
+      width: 100%;
+      height: 260px;
+      object-fit: cover;
+    }
+
+    .beat-content {
+      padding: 28px;
+    }
+
+    .beat-title {
+      font-size: 34px;
+      font-weight: 900;
+      margin-bottom: 10px;
+    }
+
+    .beat-type {
+      color: #888;
+      margin-bottom: 25px;
+    }
+
+    .beat-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .price {
+      color: #d9ff00;
+      font-size: 34px;
+      font-weight: 900;
+    }
+
+    .buy-btn {
+      background: #d9ff00;
+      color: black;
+      border: none;
+      padding: 15px 25px;
+      border-radius: 14px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .upload-box {
+      margin-top: 100px;
+      background: #0d0d0d;
+      border: 1px solid rgba(255,255,255,0.08);
+      padding: 40px;
+      border-radius: 30px;
+    }
+
+    .upload-box h2 {
+      font-size: 40px;
+      margin-bottom: 25px;
+    }
+
+    input {
+      width: 100%;
+      margin-bottom: 20px;
+      background: #151515;
+      border: 1px solid rgba(255,255,255,0.08);
+      color: white;
+      padding: 18px;
+      border-radius: 15px;
+      font-size: 16px;
+    }
+
+    footer {
+      padding: 60px 7%;
+      color: #666;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      margin-top: 100px;
+    }
+
+    @media(max-width: 900px) {
+      .hero {
+        flex-direction: column;
+        padding-top: 100px;
+      }
+
+      .hero-text h1 {
+        font-size: 70px;
+      }
+
+      nav {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="bg-glow"></div>
+
+<header>
+  <div>
+    <div class="logo">LATIN NOISE LLC</div>
+  </div>
+
+  <nav>
+    <a href="#">Browse</a>
+    <a href="#">Upload</a>
+    <a href="#">Licenses</a>
+    <button class="sell-btn">SELL BEATS</button>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="hero-text">
+    <h1>
+      VICTOR<br>
+      MENDIVIL<br>
+      OFFICIAL<br>
+      BEAT STORE.
+    </h1>
+
+    <p>
+      Upload your beats, accept payments, auto-send licenses,
+      and build your own BeatStars-style producer business.
+    </p>
+
+    <div class="buttons">
+      <button class="primary">START SELLING</button>
+      <button class="secondary">VIEW STORE</button>
+    </div>
+  </div>
+</section>
+
+<section class="beats-section">
+  <h2 class="section-title">TRENDING BEATS</h2>
+  <p class="section-sub">Premium Trap • R&B • Latin Type Beats</p>
+
+  <div class="beats-grid" id="beatsGrid">
+
+    <div class="beat-card">
+      <img src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?q=80&w=1400&auto=format&fit=crop">
+
+      <div class="beat-content">
+        <div class="beat-title">No Sleep</div>
+        <div class="beat-type">Victor Mendivil Type Beat</div>
+
+        <div class="beat-bottom">
+          <div class="price">$79</div>
+          <button class="buy-btn" onclick="buyBeat('No Sleep')">
+            BUY
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="beat-card">
+      <img src="https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=1400&auto=format&fit=crop">
+
+      <div class="beat-content">
+        <div class="beat-title">Street Code</div>
+        <div class="beat-type">Latin Trap Type Beat</div>
+
+        <div class="beat-bottom">
+          <div class="price">$99</div>
+          <button class="buy-btn" onclick="buyBeat('Street Code')">
+            BUY
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="upload-box">
+    <h2>UPLOAD NEW BEAT</h2>
+
+    <input type="text" id="beatName" placeholder="Beat Name">
+    <input type="text" id="beatType" placeholder="Beat Type">
+    <input type="text" id="beatPrice" placeholder="Price">
+    <input type="file" id="beatFile">
+
+    <button class="primary" onclick="uploadBeat()">
+      UPLOAD BEAT
+    </button>
+  </div>
+</section>
+
+<footer>
+  © 2026 LATIN NOISE LLC — ALL RIGHTS RESERVED.
+</footer>
+
+<script>
+
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "YOUR_ID",
+    appId: "YOUR_APP_ID"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+
+  const db = firebase.firestore();
+  const storage = firebase.storage();
+
+  function buyBeat(beatName) {
+
+    alert("Payment Successful for " + beatName);
+
+    const licenseWindow = window.open('', '_blank');
+
+    licenseWindow.document.write(`
+      <html>
+      <head>
+        <title>License</title>
+        <style>
+          body {
+            background: #0b0b0b;
+            color: white;
+            padding: 50px;
+            font-family: Arial;
+          }
+
+          h1 {
+            color: #d9ff00;
+            font-size: 50px;
+          }
+
+          .box {
+            background: #111;
+            padding: 40px;
+            border-radius: 25px;
+            border: 1px solid #222;
+          }
+        </style>
+      </head>
+
+      <body>
+        <div class="box">
+          <h1>LATIN NOISE LLC</h1>
+          <h2>Beat License Agreement</h2>
+
+          <p><strong>Beat:</strong> ${beatName}</p>
+          <p><strong>License:</strong> WAV + MP3 Lease</p>
+          <p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p>
+
+          <hr>
+
+          <p>
+            Buyer may commercially use this beat on streaming platforms,
+            YouTube, and performances.
+          </p>
+
+          <p>
+            Credit required: Prod. by Latin Noise LLC
+          </p>
+        </div>
+      </body>
+      </html>
+    `);
+  }
+
+  async function uploadBeat() {
+
+    const name = document.getElementById('beatName').value;
+    const type = document.getElementById('beatType').value;
+    const price = document.getElementById('beatPrice').value;
+    const file = document.getElementById('beatFile').files[0];
+
+    if (!file) {
+      alert('Please select a file');
+      return;
+    }
+
+    const storageRef = storage.ref('beats/' + file.name);
+
+    await storageRef.put(file);
+
+    const downloadURL = await storageRef.getDownloadURL();
+
+    await db.collection('beats').add({
+      name,
+      type,
+      price,
+      file: downloadURL,
+      createdAt: new Date()
+    });
+
+    alert('Beat uploaded successfully');
+  }
+
+</script>
+
+</body>
+</html>
